@@ -76,10 +76,13 @@ public class PasswordResetTokenService {
         // salva no banco (update ou insert)
         passwordResetTokenRepository.save(resetToken);
 
-        // monta link de reset
-        String link = "http://localhost:5173/reset-password?token=" + tokenValue;
+        // pega a url do front
+        String frontendUrl = System.getProperty("FRONTEND_URL");
 
-        // envia email
+        // Monta link de reset
+        String link = frontendUrl + "/reset-password?token=" + tokenValue;
+
+        // Envia email
         emailService.enviarEmailReset(user.getEmail(), link);
     }
 
@@ -159,10 +162,11 @@ public class PasswordResetTokenService {
         // salva alterações
         passwordResetTokenRepository.save(token);
 
+        // pega url do front
+        String frontendUrl = System.getProperty("FRONTEND_URL");
+
         // envia email
-        String link =
-                "http://localhost:5173/reset-password?token=" +
-                        token.getToken();
+        String link = frontendUrl + "/reset-password?token=" + token.getToken();
 
         emailService.enviarEmailReset(user.getEmail(), link);
     }

@@ -54,6 +54,12 @@ public class SecurityConfig {
                         // ========== PÚBLICAS ==========
 
                         .requestMatchers(
+                                HttpMethod.GET,
+                                "/users/validate-username",
+                                "/users/validate-email"
+                        ).permitAll()
+
+                        .requestMatchers(
                                 "/auth/**",
                                 "/uploads/**",
                                 "/files/**",

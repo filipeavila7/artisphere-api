@@ -52,7 +52,7 @@ public class UserService {
     }
 
     // verifica se o email ja esta em uso
-    public RegisterSuggestions validadeEmail(String email){
+    public RegisterSuggestions validateEmail(String email){
         return new RegisterSuggestions(
                 !globalHelperService.validadeEmailOnCreate(email), List.of()
         );
@@ -93,7 +93,6 @@ public class UserService {
 
     }
 
-    // TODO - verifica se o email e userName ja exitste
 
     // ========== PUT ==========
 
@@ -155,6 +154,7 @@ public class UserService {
     private List<String> generateUsernameSuggestions(String userName) {
         List<String> suggestions = new ArrayList<>();
 
+        // adciona sugestões ao userName
         List<String> candidates = List.of(
                 userName + "7",
                 userName + "01",
@@ -163,11 +163,13 @@ public class UserService {
                 userName + "123"
         );
 
+        // percorrer elas e verifica as disponíveis
         for (String candidate : candidates) {
             if (!globalHelperService.validadeUserNameOnCreate(candidate)) {
                 suggestions.add(candidate);
             }
 
+            // para quando achar 3 sugestões válidas
             if (suggestions.size() == 3) {
                 break;
             }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PasswordResetTokenController {
     private final PasswordResetTokenService service;
 
-    //  TODO - deixar que o frontEnd envie o link ou a url do dominio para montar o link
+
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(

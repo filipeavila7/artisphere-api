@@ -2,15 +2,13 @@ package com.example.demo.user.Service;
 
 
 import com.example.demo.exeptions.user.UserConflictException;
-import com.example.demo.user.dto.UpdateUserRequest;
-import com.example.demo.user.dto.UserRequest;
-import com.example.demo.user.dto.UserResponse;
-import com.example.demo.user.dto.UserRoleResponse;
+import com.example.demo.user.dto.*;
 import com.example.demo.user.entity.Role;
 import com.example.demo.helpers.GlobalHelperService;
 import com.example.demo.user.mapper.UserMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +16,10 @@ import org.springframework.stereotype.Service;
 import com.example.demo.profile.entity.Profile;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +39,41 @@ public class UserService {
     }
 
 
-    // ========== POST ==========
+    // verifica se o userName ja esta em uso e da sugestões de novos nomes
+    public RegisterSuggestions validateUsername(String userName) {
 
-    // TODO - verifica se o email e userName ja exitste
+        // caso o nome esteja disponivel
+        if (!globalHelperService.validadeUserNameOnCreate(userName)) {
+            return new RegisterSuggestions(true, List.of());
+        }
+
+        // caso não esteja disponivel
+        return new RegisterSuggestions(false, generateUsernameSuggestions(userName));
+    }
+
+    // verifica se o email ja esta em uso
+    public RegisterSuggestions validadeEmail(String email){
+        return new RegisterSuggestions(
+                !globalHelperService.validadeEmailOnCreate(email), List.of()
+        );
+    }
+
+
+    // ========== POST ==========
 
     // criar usuario
     @Transactional
     public UserResponse createUser(UserRequest request){
+
+        // verifica se o userName ou email ja esta sendo usado
+        if (globalHelperService.validadeUserNameOnCreate(request.userName()
+        ) || globalHelperService.validadeEmailOnCreate(request.email())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Nome de usuário ou email já está em uso"
+            );
+        }
+
         // instanciar o user
         User user = new User();
 
@@ -72,6 +102,12 @@ public class UserService {
         User loggedUser = globalHelperService.getLoggedUser();
 
         if (request.userName() != null){
+            if (globalHelperService.validadeUserNameOnCreate(request.userName())){
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Nome de usuário ou email já está em uso"
+                );
+            }
             loggedUser.setUserName(request.userName());
         }
 
@@ -115,5 +151,28 @@ public class UserService {
     }
 
 
-    
+    // retornar ate 3 sugestões validas
+    private List<String> generateUsernameSuggestions(String userName) {
+        List<String> suggestions = new ArrayList<>();
+
+        List<String> candidates = List.of(
+                userName + "7",
+                userName + "01",
+                userName + "_dev",
+                userName + ".br",
+                userName + "123"
+        );
+
+        for (String candidate : candidates) {
+            if (!globalHelperService.validadeUserNameOnCreate(candidate)) {
+                suggestions.add(candidate);
+            }
+
+            if (suggestions.size() == 3) {
+                break;
+            }
+        }
+
+        return suggestions;
+    }
 }

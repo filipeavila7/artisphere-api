@@ -19,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> { // passar cl
 
     boolean existsByUserNameAndIdNot(String userName, Long id);
 
+    boolean existsByUserName(String userName);
+    boolean existsByEmail(String email);
+
     @Query("SELECT u.id FROM User u WHERE u.id IN :userIds AND u.profile.privateProfile = true")
     Set<Long> findPrivateUserIds(@Param("userIds") Collection<Long> userIds);
 

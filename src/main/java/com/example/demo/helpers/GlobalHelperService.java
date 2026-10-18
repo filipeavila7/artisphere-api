@@ -129,11 +129,23 @@ public class GlobalHelperService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    // verificar se o userName ja existe
+    // verificar se o userName ja existe, usado para editar o userName na profile
     public boolean validadeUserName(String userName){
         return userRepository.existsByUserNameAndIdNot(userName, this.getLoggedUser().getId());
     }
 
+
+    public boolean validadeUserNameOnCreate(String userName){
+        return userRepository.existsByUserName(userName);
+    }
+
+    public boolean validadeEmailOnCreate(String email){
+        return userRepository.existsByEmail(email);
+    }
+
+
+
+    // pega o user logado, ou retorna null caso não exista, usado para não quebrar certos metodos
     public User getLoggedUserOrNull() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
